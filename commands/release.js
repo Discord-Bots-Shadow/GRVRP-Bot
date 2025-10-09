@@ -16,7 +16,7 @@ export default {
   async execute(interaction) {
     const host = interaction.options.getUser("host");
     const link = interaction.options.getString("link");
-    const sessionHostRoleId = "1416802953146400840";
+    const sessionHostRoleId = "1400142649289216040";
 
     if (!interaction.member.roles.cache.has(sessionHostRoleId)) {
       return await interaction.reply({
