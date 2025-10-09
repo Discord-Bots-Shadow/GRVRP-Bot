@@ -17,7 +17,7 @@ for (const file of commandFiles) {
   }
 }
 
-const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
 // ⚙️ Register commands to ONE SERVER (not global)
 try {
