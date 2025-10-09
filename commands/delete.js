@@ -12,7 +12,7 @@ export default {
     ),
 
   async execute(interaction) {
-    const sessionHostRoleId = "1416802953146400840";
+    const sessionHostRoleId = "1400142649289216040";
 
     if (!interaction.member.roles.cache.has(sessionHostRoleId)) {
       return await interaction.reply({
