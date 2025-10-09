@@ -29,7 +29,7 @@ export default {
     const needed = interaction.options.getInteger("needed");
     
     // Hardcoded role ID (optional — change or remove if not needed)
-    const sessionHostRoleId = "1416802953146400840";
+    const sessionHostRoleId = "1400142649289216040";
 
     // Check permission
     if (!interaction.member.roles.cache.has(sessionHostRoleId)) {
