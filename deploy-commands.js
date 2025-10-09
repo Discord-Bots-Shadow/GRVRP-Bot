@@ -27,7 +27,7 @@ try {
   console.log(`🔄 Refreshing ${commands.length} commands for guild ${guildId}...`);
 
   const data = await rest.put(
-    Routes.applicationGuildCommands(clientId),
+    Routes.applicationGuildCommands(clientId, guildid),
     { body: commands },
   );
 
