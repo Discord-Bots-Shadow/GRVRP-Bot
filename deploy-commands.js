@@ -1,30 +1,37 @@
-import { REST, Routes } from 'discord.js';
-import fs from 'fs';
-import dotenv from 'dotenv';
+import { REST, Routes } from "discord.js";
+import fs from "fs";
+import path from "path";
+import dotenv from "dotenv";
 dotenv.config();
 
 const commands = [];
-const commandFiles = fs.readdirSync('./commands').filter(f => f.endsWith('.js'));
+const foldersPath = path.join(process.cwd(), "commands");
+const commandFiles = fs.readdirSync(foldersPath).filter(file => file.endsWith(".js"));
 
+// ✅ Load all commands dynamically
 for (const file of commandFiles) {
-  const command = await import(`./commands/${file}`);
-  commands.push(command.default.data.toJSON());
+  const filePath = path.join(foldersPath, file);
+  const command = (await import(`file://${filePath}`)).default;
+  if (command?.data) {
+    commands.push(command.data.toJSON());
+  }
 }
 
-const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
-(async () => {
-  try {
-    console.log('⏳ Deploying global commands...');
-    
-    await rest.put(
-      Routes.applicationCommands(process.env.CLIENT_ID),
-      { body: commands }
-    );
+// ⚙️ Register commands to ONE SERVER (not global)
+try {
+  const clientId = process.env.CLIENT_ID;
+  const guildId = process.env.GUILD_ID; // <-- Make sure to set this in Render env vars or .env
 
-    console.log('🌍 Global commands deployed successfully!');
-    console.log('⚠️ Note: It can take up to 1 hour for changes to appear globally.');
-  } catch (err) {
-    console.error('❌ Error deploying commands:', err);
-  }
-})();
+  console.log(`🔄 Refreshing ${commands.length} commands for guild ${guildId}...`);
+
+  const data = await rest.put(
+    Routes.applicationGuildCommands(clientId, guildId),
+    { body: commands },
+  );
+
+  console.log(`✅ Successfully reloaded ${data.length} guild commands!`);
+} catch (error) {
+  console.error("❌ Error while deploying commands:", error);
+}
