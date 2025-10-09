@@ -1,37 +1,29 @@
 import { REST, Routes } from "discord.js";
 import fs from "fs";
-import path from "path";
 import dotenv from "dotenv";
 dotenv.config();
 
-const commands = [];
-const foldersPath = path.join(process.cwd(), "commands");
-const commandFiles = fs.readdirSync(foldersPath).filter(file => file.endsWith(".js"));
+const clientId = process.env.CLIENT_ID;
+const guildId = process.env.GUILD_ID;
+const token = process.env.DISCORD_TOKEN;
 
-// ✅ Load all commands dynamically
+const commands = [];
+const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
+
 for (const file of commandFiles) {
-  const filePath = path.join(foldersPath, file);
-  const command = (await import(`file://${filePath}`)).default;
-  if (command?.data) {
-    commands.push(command.data.toJSON());
-  }
+  const command = await import(`./commands/${file}`);
+  commands.push(command.default.data.toJSON());
 }
 
-const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
+const rest = new REST({ version: "10" }).setToken(token);
 
-// ⚙️ Register commands to ONE SERVER (not global)
 try {
-  const clientId = process.env.CLIENT_ID;
-  const guildId = process.env.GUILD_ID; // <-- Make sure to set this in Render env vars or .env
-
   console.log(`🔄 Refreshing ${commands.length} commands for guild ${guildId}...`);
-
-  const data = await rest.put(
-    Routes.applicationGuildCommands(clientId, guildid),
-    { body: commands },
+  await rest.put(
+    Routes.applicationGuildCommands(clientId, guildId),
+    { body: commands }
   );
-
-  console.log(`✅ Successfully reloaded ${data.length} guild commands!`);
+  console.log("✅ Successfully deployed guild commands!");
 } catch (error) {
   console.error("❌ Error while deploying commands:", error);
 }
